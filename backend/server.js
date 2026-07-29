@@ -74,10 +74,8 @@ async function connectDatabase() {
   if (isConnected) return;
 
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    // 🚀 Fixed: Removed deprecated useNewUrlParser and useUnifiedTopology properties
+    await mongoose.connect(process.env.MONGO_URI);
     isConnected = true;
     console.log("⚡ MongoDB Connected Successfully");
   } catch (err) {
