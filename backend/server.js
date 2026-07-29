@@ -50,18 +50,24 @@ app.use('/api/system', systemRoutes);
 app.use('/api/contact', contactRoutes);
 
 // ========================================================
-// 🌐 SERVE FRONTEND STATIC FILES (OPTION 2)
+// 🌐 SERVE FRONTEND STATIC FILES (OPTION 2 - NEXT.JS UPDATED)
 // ========================================================
-// 1. Point Express to your frontend build folder (assuming Vite/React using 'dist')
-app.use(express.static(path.join(__dirname, 'frontend/dist')));
+// 1. Point Express to your Next.js standalone export or build files
+app.use(express.static(path.join(__dirname, '../frontend/.next')));
+app.use(express.static(path.join(__dirname, '../frontend/out'))); // Fallback fallback if your app uses static exports
 
-// 2. Route any page request that isn't an API route back to index.html
+// 2. Route any page request that isn't an API route back to the client router
 app.get('*', (req, res) => {
-  // If it looks like an API call but failed, don't serve index.html
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: "API route not found" });
   }
-  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+  // Tries to find the built Next.js index layout
+  res.sendFile(path.join(__dirname, '../frontend/.next', 'index.html'), (err) => {
+    if (err) {
+      // If standalone index file doesn't exist, check standard static export folder
+      res.sendFile(path.join(__dirname, '../frontend/out', 'index.html'));
+    }
+  });
 });
 // ========================================================
 
