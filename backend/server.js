@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const path = require('path'); // Added for resolving file paths
+const path = require('path'); 
 require('dotenv').config();
 
 const app = express();
@@ -10,7 +10,9 @@ const app = express();
 // 🚀 Production CORS Policy Setup
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://vercel.app" 
+  "https://vercel.app",
+  "https://omnihub-e-commerce-ruby.vercel.app",
+  "https://omnihub-e-commerce-e7uhu1pgv-saitrox.vercel.app"
 ];
 
 app.use(cors({
@@ -37,7 +39,11 @@ const cartRoutes = require('./routes/cartRoutes');
 const systemRoutes = require('./routes/system');
 const contactRoutes = require('./routes/contact');
 
-// 🔌 Gateway Verification Ping Route
+// 🔌 Gateway Verification Ping Route / Root View
+app.get('/', (req, res) => {
+  res.status(200).json({ status: "online", gateway: "Omnihub Quantum API Operational", timestamp: new Date().toISOString() });
+});
+
 app.get('/api/test', (req, res) => {
   res.status(200).json({ status: "online", gateway: "Omnihub Quantum API Operational", timestamp: new Date().toISOString() });
 });
@@ -48,15 +54,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/contact', contactRoutes);
-
-// ========================================================
-// 🌐 SERVE FRONTEND STATIC FILES (OPTION 2 - NEXT.JS UPDATED)
-// ========================================================
-app.get('/', (req, res) => {
-  res.send('Omnihub Production API Operational');
-});
-
-// ========================================================
 
 // 🛠️ Serverless Graceful Error Interceptor
 app.use((err, req, res, next) => {
