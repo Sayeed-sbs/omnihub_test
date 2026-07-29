@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path'); // Added for resolving file paths
 require('dotenv').config();
 
 const app = express();
@@ -9,25 +10,21 @@ const app = express();
 // 🚀 Production CORS Policy Setup
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://vercel.app" // Fallback - replace or expand with your exact deployed Vercel domain
+  "https://vercel.app" 
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow server-to-server or local automated requests (no origin)
     if (!origin) return callback(null, true);
-    
-    // Normalize string constraints by removing any accidental trailing slashes
     const cleanOrigin = origin.replace(/\/$/, "");
     const isAllowed = allowedOrigins.some(allowed => allowed.replace(/\/$/, "") === cleanOrigin);
-    
     if (isAllowed) {
       callback(null, true);
     } else {
       callback(new Error('Blocked by security rules (CORS Production Constraint)'));
     }
   },
-  credentials: true // Crucial for passing httpOnly secure session cookies across environments
+  credentials: true 
 }));
 
 app.use(express.json());
@@ -42,11 +39,7 @@ const contactRoutes = require('./routes/contact');
 
 // 🔌 Gateway Verification Ping Route
 app.get('/api/test', (req, res) => {
-  res.status(200).json({ 
-    status: "online", 
-    gateway: "Omnihub Quantum API Operational",
-    timestamp: new Date().toISOString()
-  });
+  res.status(200).json({ status: "online", gateway: "Omnihub Quantum API Operational", timestamp: new Date().toISOString() });
 });
 
 // 📌 Mount Active Full-Stack Port Matrix Endpoints
@@ -56,14 +49,26 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/contact', contactRoutes);
 
+// ========================================================
+// 🌐 SERVE FRONTEND STATIC FILES (OPTION 2)
+// ========================================================
+// 1. Point Express to your frontend build folder (assuming Vite/React using 'dist')
+app.use(express.static(path.join(__dirname, 'frontend/dist')));
+
+// 2. Route any page request that isn't an API route back to index.html
+app.get('*', (req, res) => {
+  // If it looks like an API call but failed, don't serve index.html
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: "API route not found" });
+  }
+  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+});
+// ========================================================
+
 // 🛠️ Serverless Graceful Error Interceptor
 app.use((err, req, res, next) => {
   console.error("🔥 System Error Context:", err.message);
-  res.status(500).json({
-    success: false,
-    message: "Internal operational anomaly detected.",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined
-  });
+  res.status(500).json({ success: false, message: "Internal operational anomaly detected.", error: process.env.NODE_ENV === "development" ? err.message : undefined });
 });
 
 // 💾 Managed Database Connection Layer
@@ -72,9 +77,7 @@ let isConnected = false;
 
 async function connectDatabase() {
   if (isConnected) return;
-
   try {
-    // 🚀 Fixed: Removed deprecated useNewUrlParser and useUnifiedTopology properties
     await mongoose.connect(process.env.MONGO_URI);
     isConnected = true;
     console.log("⚡ MongoDB Connected Successfully");
@@ -84,11 +87,9 @@ async function connectDatabase() {
 }
 
 // 🌐 Run App Context Listener
-// 🌐 Run App Context Listener (Configured for Continuous Render Hosting)
 connectDatabase().then(() => {
   app.listen(PORT, () => console.log(`🚀 Production server matrix online on port ${PORT}`));
 });
-
 
 // 📦 Export Application Layout Interface for Vercel
 module.exports = app;
