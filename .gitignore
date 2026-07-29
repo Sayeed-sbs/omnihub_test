@@ -1,0 +1,15 @@
+# Node Dependencies
+node_modules/
+
+# Next.js Build Output
+.next/
+out/
+
+# Environment Private Keys
+.env
+.env.local
+
+# System Files
+.DS_Store
+Thumbs.db
+.vercel
