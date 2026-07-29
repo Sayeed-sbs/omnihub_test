@@ -84,15 +84,11 @@ async function connectDatabase() {
 }
 
 // 🌐 Run App Context Listener
-if (process.env.NODE_ENV !== 'production') {
-  // Traditional continuous listener fallback for local development
-  connectDatabase().then(() => {
-    app.listen(PORT, () => console.log(`🚀 Production server matrix online on port ${PORT}`));
-  });
-} else {
-  // Auto-invoke execution sequence for serverless deployments
-  connectDatabase();
-}
+// 🌐 Run App Context Listener (Configured for Continuous Render Hosting)
+connectDatabase().then(() => {
+  app.listen(PORT, () => console.log(`🚀 Production server matrix online on port ${PORT}`));
+});
+
 
 // 📦 Export Application Layout Interface for Vercel
 module.exports = app;
